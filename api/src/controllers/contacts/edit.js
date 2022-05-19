@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Contact = require("../../models/contact");
-const sharp = require('sharp'); 
+const sharp = require('sharp');
 
 const editContact = async (req, res) => {
     // check id formatting
@@ -9,17 +9,15 @@ const editContact = async (req, res) => {
         return;
     }
 
-    hasImage = false;
+    updateImage = false;
     if (req.file && req.file.mimetype.slice(0, 5) == "image") {
-        const image = await sharp(req.file.buffer).resize(256, 256).toBuffer().toString('base64');
-        console.log("saved thumbnail");
-        hasImage=true;
+        updateImage = true;
     } else if (req.file) {
         res.status(400).send("Require valid image");
         return;
     }
 
-    const searchObj = { _id: mongoose.Types.ObjectId(req.params.itemId) };
+    const searchObj = { _id: mongoose.Types.ObjectId(req.params.contactId) };
 
 
     // conditionally add properties to object, since we only need to update certain fields and not repalce the whole doc
@@ -33,7 +31,6 @@ const editContact = async (req, res) => {
         ...("lastName" in req.body && req.body.lastName !== "") && { lastName: req.body.lastName },
         ...("email" in req.body && req.body.email !== "") && { email: req.body.email },
         ...("phoneNumber" in req.body && req.body.phoneNumber !== "") && { phoneNumber: req.body.phoneNumber },
-        ...(hasImage) && { image: image },
     };
 
 
@@ -48,7 +45,13 @@ const editContact = async (req, res) => {
             if (err) { res.status(400).send({ error: err }); }
             else if (doc == null) { res.status(404).send("Invalid item (contactId not found in DB)"); }
             else {
-                res.send(doc);
+                image = req.params.contactId;
+                if (updateImage) {
+                    sharp(req.file.buffer).resize(256, 256).toFile("./public/images/" + image + ".jpg")
+                        .then(res.send(doc))
+                        .catch(err => { res.status(500).send("Server error: image was not updated") });
+                }
+                
             }
         }
     );

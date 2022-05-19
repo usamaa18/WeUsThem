@@ -7,11 +7,11 @@ const { listContacts } = require('../src/controllers/contacts/list');
 const multer = require('multer');
 const upload = multer({ storage: multer.memoryStorage() })
 
-router.post('/', upload.single('upfile'), (req, res) => {
+router.post('/', upload.single('image'), (req, res) => {
     createContact(req, res);
 });
 
-router.post('/:contactId', upload.single('upfile'), (req, res) => {
+router.post('/:contactId', upload.single('image'), (req, res) => {
     editContact(req, res);
 });
 

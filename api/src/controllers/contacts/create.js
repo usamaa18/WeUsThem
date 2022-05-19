@@ -1,5 +1,6 @@
 const Contact = require("../../models/contact");
-const sharp = require('sharp'); 
+const sharp = require('sharp');
+const mongoose = require('mongoose');
 
 const createContact = async (req, res) => {
 
@@ -10,28 +11,31 @@ const createContact = async (req, res) => {
     return;
   }
 
+  id = new mongoose.Types.ObjectId();
+  image = id; // in a real deployment, this would instead be the url to the image served by a cdn
+
   if (req.file && req.file.mimetype.slice(0, 5) == "image") {
-    const image = await sharp(req.file.buffer).resize(256, 256).toBuffer();
-    console.log("saved thumbnail");
+    sharp(req.file.buffer).resize(256, 256).toFile("./public/images/" + image + ".jpg").then(info => {
+      const obj = {
+        _id: id,
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        email: req.body.email,
+        phoneNumber: req.body.phoneNumber,
+        image: image
+      };
+
+      Contact.create(obj, (err, doc) => {
+        if (err) { res.status(400).send({ error: err }); }
+        else {
+          res.send(doc);
+        }
+      });
+    }).catch(err => { res.status(500).send(err) });
   } else {
     res.status(400).send("Require valid image");
     return;
   }
-
-  const obj = {
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
-    email: req.body.email,
-    phoneNumber: req.body.phoneNumber,
-    image: image
-  };
-
-  Contact.create(obj, (err, doc) => {
-    if (err) { res.status(400).send({ error: err }); }
-    else {
-      res.send(doc);
-    }
-  });
 }
 
 module.exports = { createContact };
