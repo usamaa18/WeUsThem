@@ -32,8 +32,7 @@ const editContact = async (req, res) => {
         ...("email" in req.body && req.body.email !== "") && { email: req.body.email },
         ...("phoneNumber" in req.body && req.body.phoneNumber !== "") && { phoneNumber: req.body.phoneNumber },
     };
-
-
+    
     Contact.findOneAndUpdate(
         searchObj,
         updateObj,
@@ -50,6 +49,8 @@ const editContact = async (req, res) => {
                     sharp(req.file.buffer).resize(256, 256).toFile("./public/images/" + image + ".jpg")
                         .then(res.send(doc))
                         .catch(err => { res.status(500).send("Server error: image was not updated") });
+                } else {
+                    res.send(doc);
                 }
                 
             }

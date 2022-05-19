@@ -11,6 +11,8 @@ const createContact = async (req, res) => {
     return;
   }
 
+  // TODO: add email and phoneNumber validation. For now, we can rely on front-end for basic syntax validation
+
   id = new mongoose.Types.ObjectId();
   image = id; // in a real deployment, this would instead be the url to the image served by a cdn
 
