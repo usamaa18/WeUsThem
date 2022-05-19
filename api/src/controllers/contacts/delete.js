@@ -18,6 +18,7 @@ const deleteContact = async (req, res) => {
             if (err) { res.status(404).send({ error: err }); }
             else if (doc == null) { res.status(400).send("Invalid item (contactId not found in DB)"); }
             else {
+                fs.unlink("./public/images/" + req.params.contactId + "jpg");
                 res.send("Deleted item successfully");
                 // alternatively can do res.send(doc);
             }
